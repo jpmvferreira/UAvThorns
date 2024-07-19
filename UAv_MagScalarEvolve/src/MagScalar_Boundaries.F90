@@ -19,34 +19,34 @@ subroutine MagScalar_Boundaries( CCTK_ARGUMENTS )
   ! enforces all the symmetry BCs.
 
   ierr = Boundary_SelectGroupForBC(cctkGH, CCTK_ALL_FACES, one, -one,      &
-       "MagScalarBase::Ei", "none")
+       "ProcaBase::Ei", "none")
   if (ierr < 0)                                                            &
-       call CCTK_WARN(0, "Failed to register BC for MagScalarBase::Ei!")
+       call CCTK_WARN(0, "Failed to register BC for ProcaBase::Ei!")
 
   ierr = Boundary_SelectGroupForBC(cctkGH, CCTK_ALL_FACES, one, -one,      &
-       "MagScalarBase::Ai", "none")
+       "ProcaBase::Ai", "none")
   if (ierr < 0)                                                            &
-       call CCTK_WARN(0, "Failed to register BC for MagScalarBase::Ai!")
+       call CCTK_WARN(0, "Failed to register BC for ProcaBase::Ai!")
 
   ierr = Boundary_SelectVarForBC(cctkGH, CCTK_ALL_FACES, one, -one,        &
-       "MagScalarBase::Aphi", "none")
+       "ProcaBase::Aphi", "none")
   if (ierr < 0)                                                            &
-       call CCTK_WARN(0, "Failed to register BC for MagScalarBase::Aphi!")
+       call CCTK_WARN(0, "Failed to register BC for ProcaBase::Aphi!")
 
   ierr = Boundary_SelectVarForBC(cctkGH, CCTK_ALL_FACES, one, -one,        &
-       "MagScalarBase::Zeta", "none")
+       "ProcaBase::Zeta", "none")
   if (ierr < 0)                                                            &
-       call CCTK_WARN(0, "Failed to register BC for MagScalarBase::Zeta!")
+       call CCTK_WARN(0, "Failed to register BC for ProcaBase::Zeta!")
 
   ierr = Boundary_SelectGroupForBC(cctkGH, CCTK_ALL_FACES, one, -one,      &
-       "MagScalarBase::phi", "none")
+       "ScalarBase::phi", "none")
   if (ierr < 0)                                                            &
-       call CCTK_WARN(0, "Failed to register BC for MagScalarBase::phi!")
+       call CCTK_WARN(0, "Failed to register BC for ScalarBase::phi!")
 
   ierr = Boundary_SelectGroupForBC(cctkGH, CCTK_ALL_FACES, one, -one,      &
-       "MagScalarBase::Kphi", "none")
+       "ScalarBase::Kphi", "none")
   if (ierr < 0)                                                            &
-       call CCTK_WARN(0, "Failed to register BC for MagScalarBase::Kphi!")
+       call CCTK_WARN(0, "Failed to register BC for ScalarBase::Kphi!")
 
 end subroutine MagScalar_Boundaries
 !

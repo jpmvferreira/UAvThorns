@@ -1,17 +1,8 @@
 # Parameter definitions for thorn MagScalarEvolve
 
-shares: MagScalarBase
-USES CCTK_REAL mu_V
-USES CCTK_REAL E0
-USES CCTK_REAL A0
-USES CCTK_REAL Aphi0
-USES CCTK_INT  n_E
-USES CCTK_INT  n_A
-USES CCTK_INT  n_Aphi
-USES CCTK_INT  n_Zeta
+shares: ScalarBase
 USES CCTK_REAL V_lambda
 USES CCTK_REAL mu
-USES CCTK_REAL q
 USES CCTK_REAL phi1_0
 USES CCTK_REAL phi2_0
 USES CCTK_INT  n_phi1
@@ -20,6 +11,19 @@ USES CCTK_REAL Kphi1_0
 USES CCTK_REAL Kphi2_0
 USES CCTK_INT  n_Kphi1
 USES CCTK_INT  n_Kphi2
+
+shares: ProcaBase
+USES CCTK_REAL mu as mu_V
+USES CCTK_REAL E0
+USES CCTK_REAL A0
+USES CCTK_REAL Aphi0
+USES CCTK_INT  n_E
+USES CCTK_INT  n_A
+USES CCTK_INT  n_Aphi
+USES CCTK_INT  n_Zeta
+
+shares: MagScalarBase
+USES CCTK_REAL q
 
 EXTENDS KEYWORD evolution_method ""
 {

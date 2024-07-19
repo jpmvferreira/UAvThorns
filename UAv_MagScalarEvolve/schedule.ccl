@@ -33,23 +33,21 @@ if (CCTK_EQUALS (evolution_method, "MagScalarEvolve")) {
     LANG: Fortran
   } "MoL RHS calculation for MagScalar variables"
 
-  schedule MagScalar_calc_rhs_bdry in MoL_CalcRHS as MagScalar_CalcRHS_Bdry \
-           after MagScalar_CalcRHS
+  schedule MagScalar_calc_rhs_bdry in MoL_CalcRHS as MagScalar_CalcRHS_Bdry after MagScalar_CalcRHS
   {
     LANG: Fortran
   } "MoL boundary RHS calculation for MagScalar variables"
-
 
   schedule MagScalar_Boundaries in MoL_PostStep
   {
     LANG: Fortran
     OPTIONS: LEVEL
-    SYNC: MagScalarBase::Ei
-    SYNC: MagScalarBase::Ai
-    SYNC: MagScalarBase::Aphi
-    SYNC: MagScalarBase::Zeta
-    SYNC: MagScalarBase::phi
-    SYNC: MagScalarBase::Kphi
+    SYNC: ProcaBase::Ei
+    SYNC: ProcaBase::Ai
+    SYNC: ProcaBase::Aphi
+    SYNC: ProcaBase::Zeta
+    SYNC: ScalarBase::phi
+    SYNC: ScalarBase::Kphi
   } "MoL boundary enforcement for MagScalar variables"
 
   schedule GROUP ApplyBCs as MagScalar_ApplyBCs in MoL_PostStep after MagScalar_Boundaries

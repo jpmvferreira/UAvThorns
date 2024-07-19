@@ -1,7 +1,7 @@
 # Interface definition for thorn MagScalarEvolve
 
 implements: MagScalarEvolve
-inherits: ADMBase Tmunubase MagScalarBase Boundary
+inherits: ADMBase Tmunubase ScalarBase ProcaBase MagScalarBase Boundary
 
 
 CCTK_INT FUNCTION                        \
