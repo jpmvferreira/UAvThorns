@@ -1,0 +1,234 @@
+
+#------------------------------------------------------------------------------
+ActiveThorns = "
+  ADMBase
+  # AEILocalInterp
+  # AHFinderDirect
+  Boundary
+  Carpet
+  CarpetInterp
+  CarpetIOASCII
+  CarpetIOBasic
+  CarpetIOHDF5
+  CarpetIOScalar
+  CarpetLib
+  # CarpetMask
+  CarpetReduce
+  # CarpetRegrid2
+  CarpetSlab
+  # CarpetTracker
+  CartGrid3D
+  CoordBase
+  CoordGauge
+  # Dissipation
+  # Formaline
+  Fortran
+  GenericFD
+  # GSL
+  # HDF5
+  InitBase
+  IOUtil
+  LeanBSSNMoL
+  LocalInterp
+  LoopControl
+  # ML_ADMConstraints
+  # ML_BSSN
+  # ML_BSSN_Helper
+  MoL
+  # Multipole
+  NaNChecker
+  NewRad
+  # NPScalars_Proca
+  ProcaBase
+  Proca_simpleID
+  # PunctureTracker
+  # QuasiLocalMeasures
+  ReflectionSymmetry
+  # RotatingSymmetry180
+  ScalarBase
+  ScalarInit
+  Slab
+  SpaceMask
+  SphericalSurface
+  StaticConformal
+  # SummationByParts
+  SymBase
+  # SystemStatistics
+  # TerminationTrigger
+  Time
+  TmunuBase
+  UAv_MagScalarBase
+  UAv_MagScalarEvolve
+  Vectors
+"
+#------------------------------------------------------------------------------
+
+
+# Grid setup
+#------------------------------------------------------------------------------
+
+CartGrid3D::type                     = "coordbase"
+Carpet::domain_from_coordbase        = yes
+CoordBase::domainsize                = "minmax"
+
+# make sure all (xmax - xmin)/dx are integers!
+CoordBase::xmin                      =    0.0
+CoordBase::ymin                      =    0.0
+CoordBase::zmin                      =    0.0
+CoordBase::xmax                      =   +1.0
+CoordBase::ymax                      =   +1.0
+CoordBase::zmax                      =   +1.0
+CoordBase::dx                        =    0.1
+CoordBase::dy                        =    0.1
+CoordBase::dz                        =    0.1
+
+driver::ghost_size                   = 3
+
+CoordBase::boundary_size_x_lower     = 3
+CoordBase::boundary_size_y_lower     = 3
+CoordBase::boundary_size_z_lower     = 3
+CoordBase::boundary_size_x_upper     = 3
+CoordBase::boundary_size_y_upper     = 3
+CoordBase::boundary_size_z_upper     = 3
+
+CoordBase::boundary_shiftout_x_lower = 1
+CoordBase::boundary_shiftout_y_lower = 1
+CoordBase::boundary_shiftout_z_lower = 1
+
+ReflectionSymmetry::reflection_x     = yes
+ReflectionSymmetry::reflection_y     = yes
+ReflectionSymmetry::reflection_z     = yes
+ReflectionSymmetry::avoid_origin_x   = no
+ReflectionSymmetry::avoid_origin_y   = no
+ReflectionSymmetry::avoid_origin_z   = no
+
+Time::dtfac                          = 0.5
+
+
+# Initial Data
+#------------------------------------------------------------------------------
+
+ProcaBase::mu                         = 0.4
+
+ADMBase::initial_data                 = "Proca_simpleID"
+ADMBase::initial_lapse                = "psi^n"
+ADMBase::initial_shift                = "zero"
+ADMBase::initial_dtlapse              = "zero"
+ADMBase::initial_dtshift              = "zero"
+
+ADMBase::lapse_timelevels             = 3
+ADMBase::shift_timelevels             = 3
+ADMBase::metric_timelevels            = 3
+
+# Scalar field zero initial data
+ScalarBase::mu                  = 0.
+ScalarBase::V_lambda            = 0.
+ScalarBase::initial_scalar      = "ID_SF_Zero"
+
+Proca_simpleID::initial_lapse_psi_exponent  = -2.0
+Proca_simpleID::swap_xz               = "no"
+
+Proca_simpleID::par_b                 = 1.e-5
+Proca_simpleID::par_m_plus            = 1.0
+Proca_simpleID::par_q_plus            = 0.05
+
+InitBase::initial_data_setup_method   = "init_some_levels"
+Carpet::init_fill_timelevels          = yes
+Carpet::init_3_timelevels             = no
+
+
+# Evolution
+#------------------------------------------------------------------------------
+
+TmunuBase::stress_energy_storage  = yes
+TmunuBase::stress_energy_at_RHS   = yes
+TmunuBase::timelevels             = 1
+TmunuBase::prolongation_type      = "none"
+
+MagScalarBase::evolution_method = "MagScalarEvolve"
+MagScalarEvolve::chi_floor      = 1.0d-05
+
+ADMBase::evolution_method               = "LeanBSSNMoL"
+ADMBase::lapse_evolution_method         = "LeanBSSNMoL"
+ADMBase::shift_evolution_method         = "LeanBSSNMoL"
+ADMBase::dtlapse_evolution_method       = "LeanBSSNMoL"
+ADMBase::dtshift_evolution_method       = "LeanBSSNMoL"
+
+LeanBSSNMoL::impose_conf_fac_floor_at_initial  = yes
+LeanBSSNMoL::eta_beta                     = 1
+LeanBSSNMoL::eta_beta_dynamic             = no
+LeanBSSNMoL::conf_fac_floor               = 1.0d-04
+LeanBSSNMoL::derivs_order                 = 4
+LeanBSSNMoL::use_advection_stencils       = yes
+LeanBSSNMoL::calculate_constraints        = yes
+
+
+
+
+
+
+# Integration method
+#------------------------------------------------------------------------------
+
+MoL::ODE_Method                 = "RK4"
+MoL::MoL_Intermediate_Steps     = 4
+MoL::MoL_Num_Scratch_Levels     = 1
+
+Carpet::num_integrator_substeps = 4
+
+
+# Poison
+#-------------------------------------------------------------------------------
+
+Carpet::poison_new_timelevels = yes
+CarpetLib::poison_new_memory  = yes
+
+# I/O thorns
+#-------------------------------------------------------------------------------
+
+Cactus::cctk_run_title       = $parfile
+IO::out_dir                  = $parfile
+
+IOBasic::outInfo_every       = 1
+IOBasic::outInfo_vars        = "ADMBase::alp"
+
+
+IOASCII::output_symmetry_points = no
+IOASCII::out3D_ghosts           = no
+
+# 1D text output
+IOASCII::out1D_every            = 1
+IOASCII::out_precision          = 17
+IOASCII::out1D_d                = no
+IOASCII::out1D_x                = yes
+IOASCII::out1D_y                = yes
+IOASCII::out1D_z                = yes
+IOASCII::out1D_vars             = "
+  ADMBase::lapse
+  LeanBSSNMoL::hmetric
+  LeanBSSNMoL::hcurv
+  LeanBSSNMoL::trk
+  LeanBSSNMoL::conf_fac
+  LeanBSSNMoL::gammat
+  LeanBSSNMoL::rhs_hmetric
+  LeanBSSNMoL::rhs_hcurv
+  LeanBSSNMoL::rhs_trk
+  LeanBSSNMoL::rhs_conf_fac
+  LeanBSSNMoL::rhs_gammat
+  ProcaBase::Ei
+  ProcaBase::Ai
+  ProcaBase::Aphi
+  ProcaBase::Zeta
+  UAv_MagScalarEvolve::rhs_Ei
+  UAv_MagScalarEvolve::rhs_Ai
+  UAv_MagScalarEvolve::rhs_Aphi
+  UAv_MagScalarEvolve::rhs_Zeta
+"
+
+CarpetIOASCII::compact_format = yes
+
+# Run termination
+#-------------------------------------------------------------------------------
+
+Cactus::terminate       = "iteration"
+Cactus::cctk_itlast     = 4
