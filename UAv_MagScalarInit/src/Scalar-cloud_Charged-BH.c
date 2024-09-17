@@ -281,7 +281,7 @@ void Scalar_cloud_Charged_BH(CCTK_ARGUMENTS) {
         const CCTK_REAL y1 = y[ind];
         const CCTK_REAL z1 = z[ind];
 
-        const CCTK_REAL R = sqrt(SQR(x1) + SQR(y1) + SQR(z1));
+        const CCTK_REAL R = sqrt(SQR(x1) + SQR(y1) + SQR(z1)) - R0;
 
         CCTK_REAL lpsi;
         if (R <= p.R1) {
