@@ -1,0 +1,22 @@
+# Parameter definitions
+
+SHARES: MagScalarBase
+
+EXTENDS KEYWORD initial_MagScalar
+{
+  "MagScalar_PulseID" :: "Pulse initial data for MagScalar fields"
+}
+
+
+RESTRICTED:
+
+REAL Amp "Amplitude of the pulse"
+{
+  *:*           :: "any number"
+} 10
+
+REAL cAmp "Factor on the exponential"
+{
+  *:*           :: "any number"
+} 0.15
+
