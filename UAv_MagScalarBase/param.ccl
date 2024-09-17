@@ -7,7 +7,6 @@ KEYWORD evolution_method "MagScalar variables evolution method"
 
 KEYWORD initial_MagScalar "initial data for MagScalar field"
 {
-  "zero" :: "MagScalar variables are set to zero"
   "none" :: "MagScalar variables are not initialized"
 } "none"
 
