@@ -8,3 +8,12 @@ if (CCTK_Equals(initial_MagScalar, "MagScalar_PulseID"))
     OPTIONS: Local
   } "simple pulse-like analytic initial data for MagScalar fields"
 }
+
+if (CCTK_Equals(initial_data, "scalar-cloud_charged-BH"))
+{
+  SCHEDULE Scalar_cloud_Charged_BH IN ADMBase_InitialData
+  {
+    LANG: C
+    OPTIONS: Local
+  } "Initial data for a scalar cloud surrounding a charged BH"
+}

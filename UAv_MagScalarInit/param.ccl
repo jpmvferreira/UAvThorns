@@ -1,5 +1,12 @@
 # Parameter definitions
 
+SHARES: ADMBase
+
+EXTENDS KEYWORD initial_data
+{
+  "scalar-cloud_charged-BH" :: "Initial data for a scalar cloud surrounding a charged BH"
+}
+
 SHARES: MagScalarBase
 
 EXTENDS KEYWORD initial_MagScalar
@@ -9,6 +16,8 @@ EXTENDS KEYWORD initial_MagScalar
 
 
 RESTRICTED:
+
+#=== parameters for MagScalar_InitPulse.c ===
 
 REAL Amp "Amplitude of the pulse"
 {
@@ -20,3 +29,34 @@ REAL cAmp "Factor on the exponential"
   *:*           :: "any number"
 } 0.15
 
+#=== parameters for Scalar-cloud_Charged-BH.c ===
+
+CCTK_REAL M "mass of the BH + scalar field cloud"
+{
+  0:*   :: "any positive value"
+} 1.0
+
+CCTK_REAL Q_BH "charge of the BH"
+{
+  *:*   :: "any value possible"
+} 0.9
+
+CCTK_REAL Amp "amplitude of the scalar field perturbation"
+{
+  *:*   :: "any value possible"
+} 0.5
+
+CCTK_REAL R1 "inner radius of the scalar field perturbation"
+{
+  0:*   :: "any positive value"
+} 8.0
+
+CCTK_REAL R2 "outter radius of the scalar field perturbation, must be larger than R1"
+{
+  0:*   :: "any positive value"
+} 12.0
+
+CCTK_REAL FixedDelta "a fixed step that will overwrite the variable step control"
+{
+  0:*   :: "any positive value"
+} 1e-6
