@@ -2,6 +2,6 @@
 
 IMPLEMENTS: MagScalarInit
 
-INHERITS: ADMBase grid MagScalarBase
+INHERITS: ADMBase grid ProcaBase ScalarBase MagScalarBase
 
 PUBLIC:
