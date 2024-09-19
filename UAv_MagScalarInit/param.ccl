@@ -19,7 +19,7 @@ RESTRICTED:
 
 #=== parameters for MagScalar_InitPulse.c ===
 
-REAL Amp "Amplitude of the pulse"
+REAL pAmp "Amplitude of the pulse"
 {
   *:*           :: "any number"
 } 10

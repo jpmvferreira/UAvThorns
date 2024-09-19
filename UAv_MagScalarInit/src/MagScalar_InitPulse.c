@@ -44,8 +44,8 @@ void MagScalar_InitPulse (CCTK_ARGUMENTS) {
         Az[ind] = 0;
 
         // TODO: general t ??
-        Ex[ind] = - Amp * exp(- cAmp * (x1*x1 + y1*y1 + z1*z1) ) * y1;
-        Ey[ind] =   Amp * exp(- cAmp * (x1*x1 + y1*y1 + z1*z1) ) * x1;
+        Ex[ind] = - pAmp * exp(- cAmp * (x1*x1 + y1*y1 + z1*z1) ) * y1;
+        Ey[ind] =   pAmp * exp(- cAmp * (x1*x1 + y1*y1 + z1*z1) ) * x1;
         Ez[ind] = 0;
 
         Aphi[ind] = 0;
