@@ -56,7 +56,7 @@ double Psi_RN(double R, params_t p) {
   double Q = p.Q;
   double c = p.c;
 
-  return sqrt(c + (pow(M,2) - pow(Q,2))/(4.*c*pow(R,2)) + M/R);
+  return sqrt(c + (M_PI*(M - Q)*(M + Q))/(c*pow(R,2)) + (2*M*sqrt(M_PI))/R);
 }
 
 // the derivative of the conformal factor for a charged BH
@@ -65,7 +65,7 @@ double dPsi_RN(double R, params_t p) {
   double Q = p.Q;
   double c = p.c;
 
-  return (-0.5*(pow(M,2) - pow(Q,2))/(c*pow(R,3)) - M/pow(R,2))/(2.*sqrt(c + (pow(M,2) - pow(Q,2))/(4.*c*pow(R,2)) + M/R));
+  return ((-2*M_PI*(M - Q)*(M + Q))/(c*pow(R,3)) - (2*M*sqrt(M_PI))/pow(R,2))/(2.*sqrt(c + (M_PI*(M - Q)*(M + Q))/(c*pow(R,2)) + (2*M*sqrt(M_PI))/R));
 }
 
 // 𝜙(R)
@@ -105,7 +105,7 @@ int f(double R, const double y[], double dy[], void *params) {
   double ldphi = dphi(R, p);
 
   dy[0] = y[1];
-  dy[1] = (-2.*y[1])/R - pow(Q,2)/(4.*pow(R,4)*pow(y[0],3)) - 2.*pow(ldphi,2)*M_PI*y[0];
+  dy[1] = (-2*y[1])/R - (M_PI*pow(Q,2))/(pow(R,4)*pow(y[0],3)) - 2*pow(ldphi,2)*M_PI*y[0];
 
   return GSL_SUCCESS;
 }
@@ -212,12 +212,12 @@ params_t Get_p_BH(params_t p, double C[2]) {
   double R1 = p.R1;
 
   // match solution at R = R₁
-  double M_BH = pow(Q,2)/(2.*pow(C[0],2)*R1) + 2*C[1]*pow(R1,2)*(C[0] - C[1]*R1);
-  double c_BH = pow(C[0],2) - pow(Q,2)/(4.*pow(C[0],2)*pow(R1,2)) - 2*C[0]*C[1]*R1 + pow(C[1],2)*pow(R1,2);
+  double M_BH = (M_PI*pow(Q,2) + pow(C[0],2)*C[1]*pow(R1,3)*(C[0] - C[1]*R1))/(pow(C[0],2)*sqrt(M_PI)*R1);
+  double c_BH = pow(C[0],2) - (M_PI*pow(Q,2))/(pow(C[0],2)*pow(R1,2)) - 2*C[0]*C[1]*R1 + pow(C[1],2)*pow(R1,2);
 
   if (M_BH < fabs(Q)) {
-    M_BH = pow(Q,2)/(2.*pow(C[0],2)*R1) - 2*C[1]*pow(R1,2)*(C[0] + C[1]*R1);
-    c_BH = pow(C[0],2) - pow(Q,2)/(4.*pow(C[0],2)*pow(R1,2)) + 2*C[0]*C[1]*R1 + pow(C[1],2)*pow(R1,2);
+    M_BH = (M_PI*pow(Q,2) - pow(C[0],2)*C[1]*pow(R1,3)*(C[0] + C[1]*R1))/(pow(C[0],2)*sqrt(M_PI)*R1);
+    c_BH = (-(M_PI*pow(Q,2)) + pow(C[0],2)*pow(R1,2)*pow(C[0] + C[1]*R1,2))/(pow(C[0],2)*pow(R1,2));
   }
 
   if (M_BH < fabs(Q)) {
