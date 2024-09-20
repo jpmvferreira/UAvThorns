@@ -277,11 +277,11 @@ void Scalar_cloud_Charged_BH(CCTK_ARGUMENTS) {
 
         const CCTK_INT ind = CCTK_GFINDEX3D(cctkGH, i, j, k);
 
-        const CCTK_REAL x1 = x[ind];
-        const CCTK_REAL y1 = y[ind];
-        const CCTK_REAL z1 = z[ind];
+        const CCTK_REAL x1 = x[ind] - x0;
+        const CCTK_REAL y1 = y[ind] - y0;
+        const CCTK_REAL z1 = z[ind] - z0;
 
-        const CCTK_REAL R = sqrt(SQR(x1) + SQR(y1) + SQR(z1)) - R0;
+        const CCTK_REAL R = sqrt(SQR(x1) + SQR(y1) + SQR(z1));
 
         CCTK_REAL lpsi;
         if (R <= p.R1) {

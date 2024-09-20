@@ -61,7 +61,17 @@ CCTK_REAL FixedDelta "a fixed step that will overwrite the variable step control
   0:*   :: "any positive value"
 } 1e-6
 
-CCTK_REAL R0 "the radius of the singularity of the BH"
+CCTK_REAL x0 "the x coordinate of the singularity of the BH"
+{
+  *:*   :: "any value possible"
+} 0.0
+
+CCTK_REAL y0 "the y coordinate of the singularity of the BH"
+{
+  *:*   :: "any value possible"
+} 0.0
+
+CCTK_REAL z0 "the z coordinate of the singularity of the BH"
 {
   *:*   :: "any value possible"
 } 0.0
