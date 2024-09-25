@@ -56,7 +56,7 @@ double Psi_RN(double R, params_t p) {
   double Q = p.Q;
   double c = p.c;
 
-  return sqrt(c + (M_PI*(M - Q)*(M + Q))/(c*pow(R,2)) + (2*M*sqrt(M_PI))/R);
+  return sqrt(c + (pow(M,2) - pow(Q,2))/(4.*c*pow(R,2)) + M/R);
 }
 
 // the derivative of the conformal factor for a charged BH
@@ -65,7 +65,7 @@ double dPsi_RN(double R, params_t p) {
   double Q = p.Q;
   double c = p.c;
 
-  return ((-2*M_PI*(M - Q)*(M + Q))/(c*pow(R,3)) - (2*M*sqrt(M_PI))/pow(R,2))/(2.*sqrt(c + (M_PI*(M - Q)*(M + Q))/(c*pow(R,2)) + (2*M*sqrt(M_PI))/R));
+  return (-0.5*(pow(M,2) - pow(Q,2))/(c*pow(R,3)) - M/pow(R,2))/(2.*sqrt(c + (pow(M,2) - pow(Q,2))/(4.*c*pow(R,2)) + M/R));
 }
 
 // 𝜙(R)
@@ -105,7 +105,7 @@ int f(double R, const double y[], double dy[], void *params) {
   double ldphi = dphi(R, p);
 
   dy[0] = y[1];
-  dy[1] = (-2*y[1])/R - (M_PI*pow(Q,2))/(pow(R,4)*pow(y[0],3)) - 2*pow(ldphi,2)*M_PI*y[0];
+  dy[1] = (-2.*y[1])/R - pow(Q,2)/(4.*pow(R,4)*pow(y[0],3)) - 2.*pow(ldphi,2)*M_PI*y[0];
 
   return GSL_SUCCESS;
 }
@@ -212,17 +212,20 @@ params_t Get_p_BH(params_t p, double C[2]) {
   double R1 = p.R1;
 
   // match solution at R = R₁
-  double M_BH = (M_PI*pow(Q,2) + pow(C[0],2)*C[1]*pow(R1,3)*(C[0] - C[1]*R1))/(pow(C[0],2)*sqrt(M_PI)*R1);
-  double c_BH = pow(C[0],2) - (M_PI*pow(Q,2))/(pow(C[0],2)*pow(R1,2)) - 2*C[0]*C[1]*R1 + pow(C[1],2)*pow(R1,2);
+  double M_BH = pow(Q,2)/(2.*pow(C[0],2)*R1) + 2.*C[1]*pow(R1,2)*(C[0] - C[1]*R1);
+  double c_BH = pow(C[0],2) - pow(Q,2)/(4.*pow(C[0],2)*pow(R1,2)) - 2.*C[0]*C[1]*R1 + pow(C[1],2)*pow(R1,2);
 
   if (M_BH < fabs(Q)) {
-    M_BH = (M_PI*pow(Q,2) - pow(C[0],2)*C[1]*pow(R1,3)*(C[0] + C[1]*R1))/(pow(C[0],2)*sqrt(M_PI)*R1);
-    c_BH = (-(M_PI*pow(Q,2)) + pow(C[0],2)*pow(R1,2)*pow(C[0] + C[1]*R1,2))/(pow(C[0],2)*pow(R1,2));
+    M_BH = pow(Q,2)/(2.*pow(C[0],2)*R1) - 2.*C[1]*pow(R1,2)*(C[0] + C[1]*R1);
+    c_BH = pow(C[0],2) - pow(Q,2)/(4.*pow(C[0],2)*pow(R1,2)) + 2.*C[0]*C[1]*R1 + pow(C[1],2)*pow(R1,2);
   }
 
   if (M_BH < fabs(Q)) {
-    CCTK_ERROR("Mass of the BH is smaller than its charge, no physical solutions found.");
+    CCTK_VERROR("Mass of the BH is %g, which smaller than its charge Q = %g, no physical solutions found.", M_BH, Q);
   }
+
+  CCTK_VINFO("Mass of the BH: %g", M_BH);
+  CCTK_VINFO("Parameter 'c' in the generalized solution below R1: %g", c_BH);
 
   // the parameters for the solution below R₁
   params_t p_BH = {
@@ -318,9 +321,9 @@ void Scalar_cloud_Charged_BH(CCTK_ARGUMENTS) {
         Kphi2[ind] = 0;
 
         // the electric field
-        Ex[ind] = pow(lpsi,-6) * p.Q/pow(R,3) * x1;
-        Ey[ind] = pow(lpsi,-6) * p.Q/pow(R,3) * y1;
-        Ez[ind] = pow(lpsi,-6) * p.Q/pow(R,3) * z1;
+        Ex[ind] = pow(lpsi,-6) * p.Q/(sqrt(4.*M_PI)*pow(R,3)) * x1;
+        Ey[ind] = pow(lpsi,-6) * p.Q/(sqrt(4.*M_PI)*pow(R,3)) * y1;
+        Ez[ind] = pow(lpsi,-6) * p.Q/(sqrt(4.*M_PI)*pow(R,3)) * z1;
 
         Ax[ind] = 0;
         Ay[ind] = 0;
