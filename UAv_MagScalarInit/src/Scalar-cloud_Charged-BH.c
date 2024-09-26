@@ -208,22 +208,28 @@ ReturnGetPsi Get_Psi(double h, params_t p) {
 
 // fetch the spacetime parameters when R < R₁
 params_t Get_p_BH(params_t p, double C[2]) {
+  double M  = p.M;
   double Q  = p.Q;
   double R1 = p.R1;
 
   // match solution at R = R₁
+  // this is the first branch of solutions
   double M_BH = pow(Q,2)/(2.*pow(C[0],2)*R1) + 2.*C[1]*pow(R1,2)*(C[0] - C[1]*R1);
   double c_BH = pow(C[0],2) - pow(Q,2)/(4.*pow(C[0],2)*pow(R1,2)) - 2.*C[0]*C[1]*R1 + pow(C[1],2)*pow(R1,2);
 
-  if (M_BH < fabs(Q)) {
+  // if the mass of the BH is smaller than the abs value of charge or larger than ADM mass, use second branch of solutions
+  if (M_BH < fabs(Q) || M_BH > M) {
     M_BH = pow(Q,2)/(2.*pow(C[0],2)*R1) - 2.*C[1]*pow(R1,2)*(C[0] + C[1]*R1);
     c_BH = pow(C[0],2) - pow(Q,2)/(4.*pow(C[0],2)*pow(R1,2)) + 2.*C[0]*C[1]*R1 + pow(C[1],2)*pow(R1,2);
   }
 
-  if (M_BH < fabs(Q)) {
-    CCTK_VERROR("Mass of the BH is %g, which smaller than its charge Q = %g, no physical solutions found.", M_BH, Q);
+  // if the mass of the BH is still not valid, give an error
+  if (M_BH < fabs(Q) || M_BH > M) {
+    CCTK_VERROR("M_BH is %g, which is either smaller than the absolute value of the charge Q = %g or larger than the ADM mass M = %g: no physical solutions have been found", M_BH, Q, M);
   }
 
+  // otherwise, print information to screen with the mass of the BH and the value of c
+  // TODO: find a way to only print this to screen once
   CCTK_VINFO("Mass of the BH: %g", M_BH);
   CCTK_VINFO("Parameter 'c' in the generalized solution below R1: %g", c_BH);
 
