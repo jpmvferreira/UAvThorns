@@ -7,13 +7,17 @@ EXTENDS KEYWORD initial_data
   "scalar-cloud_charged-BH" :: "Initial data for a scalar cloud surrounding a charged BH"
 }
 
+EXTENDS KEYWORD initial_lapse
+{
+  "psi^n"   :: "psi^n initial lapse profile"
+}
+
 SHARES: MagScalarBase
 
 EXTENDS KEYWORD initial_MagScalar
 {
   "MagScalar_PulseID" :: "Pulse initial data for MagScalar fields"
 }
-
 
 RESTRICTED:
 
@@ -75,3 +79,8 @@ CCTK_REAL z0 "the z coordinate of the singularity of the BH"
 {
   *:*   :: "any value possible"
 } 0.0
+
+REAL initial_lapse_psi_exponent "Exponent n for psi^-n initial lapse profile"
+{
+  (*:0) :: "Should be negative"
+} -2.0

@@ -338,6 +338,12 @@ void Scalar_cloud_Charged_BH(CCTK_ARGUMENTS) {
         Aphi[ind] = 0;
 
         Zeta[ind] = 0;
+
+        // lapse
+        if ( CCTK_EQUALS(initial_lapse, "psi^n") ) {
+          alp[ind] = pow(lpsi, initial_lapse_psi_exponent);
+        }
+
       }
     }
   }
