@@ -34,7 +34,6 @@ typedef struct {
     double* R_sol;
     double* Psi_sol;
     double* dPsi_sol;
-    double  N;
 } ReturnGetPsi;
 
 // function to reverse an array
@@ -110,7 +109,7 @@ int f(double R, const double y[], double dy[], void *params) {
   return GSL_SUCCESS;
 }
 
-ReturnGetPsi Get_Psi(double h, params_t p) {
+ReturnGetPsi Get_Psi(int N, params_t p) {
   // initial conditions
   double y[2];
   y[0] = Psi_RN(p.R2, p);
@@ -121,19 +120,14 @@ ReturnGetPsi Get_Psi(double h, params_t p) {
   double R1 = p.R1;   // final radius
   int dim   = 2;      // dimension of the system of equations
 
-  // compute the number of grid points for the ODE solver
-  int N = (R2-R1)/h;
-  N += 1;
-
-  int last_step = 0;
-  if (R2 > R1+N*h) {
-    last_step += 1;
-  }
+  // compute the step size
+  double h = (R2-R1)/( (double) N);
 
   // allocate arrays to hold the numerical solution for Ψ between R1 and R2
-  double* R_sol    = (double* ) malloc( (N+last_step) * sizeof(double));  // array for R's
-  double* Psi_sol  = (double* ) malloc( (N+last_step) * sizeof(double));  // array for Ψ(R)
-  double* dPsi_sol = (double* ) malloc( (N+last_step) * sizeof(double));  // array for dΨ/dR
+  // we need N+1 points because of the IC's
+  double* R_sol    = (double* ) malloc( (N+1) * sizeof(double));  // array for R's
+  double* Psi_sol  = (double* ) malloc( (N+1) * sizeof(double));  // array for Ψ(R)
+  double* dPsi_sol = (double* ) malloc( (N+1) * sizeof(double));  // array for dΨ/dR
 
   // store the IC's in the array
   R_sol[0]    = R2;
@@ -154,7 +148,7 @@ ReturnGetPsi Get_Psi(double h, params_t p) {
   // perform integration
   h = -h;
   double R = R2;
-  for (int i=1; i<N; i++) {
+  for (int i=1; i<=N; i++) {
     int status = gsl_odeiv2_step_apply(step, R, h, y, y_err, NULL, dydt_out, &sys);
 
     // if there is an error, print it out
@@ -164,28 +158,7 @@ ReturnGetPsi Get_Psi(double h, params_t p) {
     }
 
     // update current R
-    R += h;
-
-    // save the points in an array
-    R_sol[i]    = R;
-    Psi_sol[i]  = y[0];
-    dPsi_sol[i] = y[1];
-  }
-
-  // because the step size is fixed the last step will hardly be exactly at the boundary,
-  // therefore, we might need to perform one last step
-  for (int i=N; i < N+last_step; i++) {
-    double h = -(R-R1);
-    int status = gsl_odeiv2_step_apply(step, R, h, y, y_err, NULL, dydt_out, &sys);
-
-    // if there is an error, print it out
-    if (status != GSL_SUCCESS) {
-      printf("Error: %s\n", gsl_strerror(status));
-      CCTK_ERROR("Solving the ODE returned an error, see above.");
-    }
-
-    // update current R
-    R += h;
+    R = R2 + i*h;
 
     // save the points in an array
     R_sol[i]    = R;
@@ -197,11 +170,11 @@ ReturnGetPsi Get_Psi(double h, params_t p) {
   gsl_odeiv2_step_free(step);
 
   // reverse the arrays because GSL interpolation routines demand that the arrays are provided in increasing order of R
-  reverseArray(R_sol,    N+last_step);
-  reverseArray(Psi_sol,  N+last_step);
-  reverseArray(dPsi_sol, N+last_step);
+  reverseArray(R_sol,    N+1);
+  reverseArray(Psi_sol,  N+1);
+  reverseArray(dPsi_sol, N+1);
 
-  ReturnGetPsi res = {R_sol, Psi_sol, dPsi_sol, N+last_step};
+  ReturnGetPsi res = {R_sol, Psi_sol, dPsi_sol};
 
   return res;
 }
@@ -262,11 +235,11 @@ void Scalar_cloud_Charged_BH(CCTK_ARGUMENTS) {
   };
 
   // fetch interpolation function to compute Ψ(R)
-  ReturnGetPsi sol = Get_Psi(FixedDelta, p);
+  // remember that the size of the array is N_points+1, where i=0 is at R1 and i=N is at R2
+  ReturnGetPsi sol = Get_Psi(N_points, p);
   double* R_sol    = sol.R_sol;
   double* Psi_sol  = sol.Psi_sol;
   double* dPsi_sol = sol.dPsi_sol;
-  double  N        = sol.N;
 
   // fetch the spacetime parameters when R < R₁
   // obtained by assuming that the function and its first derivative are continuous
@@ -275,9 +248,9 @@ void Scalar_cloud_Charged_BH(CCTK_ARGUMENTS) {
 
   // create an interpolating function for Ψ(R₁<R<R₂)
   // uses a polynomial interpolator
-  gsl_interp_accel *acc = gsl_interp_accel_alloc();             // allocate the accelerator
-  gsl_spline *spline = gsl_spline_alloc(gsl_interp_linear, N);  // allocate the interpolation object
-  gsl_spline_init(spline, R_sol, Psi_sol, N);                   // initialize the interpolation object with data points
+  gsl_interp_accel *acc = gsl_interp_accel_alloc();                      // allocate the accelerator
+  gsl_spline *spline = gsl_spline_alloc(gsl_interp_linear, N_points+1);  // allocate the interpolation object
+  gsl_spline_init(spline, R_sol, Psi_sol, N_points+1);                   // initialize the interpolation object with points
 
   // iterate over the spatial grid
   for (CCTK_INT k = 0; k < cctk_lsh[2]; ++k) {

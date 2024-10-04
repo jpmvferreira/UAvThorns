@@ -60,10 +60,10 @@ CCTK_REAL R2 "outter radius of the scalar field perturbation, must be larger tha
   0:*   :: "any positive value"
 } 12.0
 
-CCTK_REAL FixedDelta "a fixed step that will overwrite the variable step control"
+CCTK_INT N_points "The number of points to go from R1 to R2 to perform the numerical integration"
 {
-  0:*   :: "any positive value"
-} 1e-6
+  1:*   :: "any positive integer that is larger or equal to 1"
+} 1000000
 
 CCTK_REAL x0 "the x coordinate of the singularity of the BH"
 {
