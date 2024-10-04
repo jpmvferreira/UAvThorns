@@ -293,11 +293,16 @@ void Scalar_cloud_Charged_BH(CCTK_ARGUMENTS) {
         const CCTK_REAL R = sqrt(SQR(x1) + SQR(y1) + SQR(z1));
 
         CCTK_REAL lpsi;
-        if (R <= p.R1) {
-          lpsi = Psi_RN(R, p_BH);
-        }
-        else if (p.R1 < R && R < p.R2) {
-          lpsi = gsl_spline_eval(spline, R, acc);
+        if (integrate_phi != 0) {
+          if (R <= p.R1) {
+            lpsi = Psi_RN(R, p_BH);
+          }
+          else if (p.R1 < R && R < p.R2) {
+            lpsi = gsl_spline_eval(spline, R, acc);
+          }
+          else {
+            lpsi = Psi_RN(R, p);
+          }
         }
         else {
           lpsi = Psi_RN(R, p);

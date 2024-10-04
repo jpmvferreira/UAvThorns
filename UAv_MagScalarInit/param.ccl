@@ -84,3 +84,7 @@ REAL initial_lapse_psi_exponent "Exponent n for psi^-n initial lapse profile"
 {
   (*:0) :: "Should be negative"
 } -2.0
+
+BOOLEAN integrate_phi "take into account the scalar field from R1 to R2 (should be set to no for debugging only)"
+{
+} "yes"
