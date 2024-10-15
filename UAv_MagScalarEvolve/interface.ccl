@@ -1,7 +1,7 @@
 # Interface definition for thorn MagScalarEvolve
 
 implements: MagScalarEvolve
-inherits: ADMBase Tmunubase MagScalarBase Boundary
+inherits: ADMBase Tmunubase ScalarBase ProcaBase MagScalarBase Boundary
 
 
 CCTK_INT FUNCTION                        \
@@ -94,3 +94,11 @@ CCTK_REAL trk type=gf tags='tensortypealias="Scalar" tensorweight=0 prolongation
 {
   tracek
 } "Tr(K)"
+
+
+public:
+
+CCTK_REAL gauss type=gf timelevels=3 tags='tensortypealias="Scalar" tensorweight=0'
+{
+  gc
+} "Gauss constraint"

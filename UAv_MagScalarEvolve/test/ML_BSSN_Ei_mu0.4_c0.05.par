@@ -1,0 +1,266 @@
+
+#------------------------------------------------------------------------------
+ActiveThorns = "
+  ADMBase
+  # AEILocalInterp
+  # AHFinderDirect
+  Boundary
+  Carpet
+  CarpetInterp
+  CarpetIOASCII
+  CarpetIOBasic
+  CarpetIOHDF5
+  CarpetIOScalar
+  CarpetLib
+  # CarpetMask
+  CarpetReduce
+  # CarpetRegrid2
+  CarpetSlab
+  # CarpetTracker
+  CartGrid3D
+  CoordBase
+  CoordGauge
+  # Dissipation
+  # Formaline
+  Fortran
+  GenericFD
+  # GSL
+  # HDF5
+  InitBase
+  IOUtil
+  # LeanBSSNMoL
+  LocalInterp
+  LoopControl
+  # ML_ADMConstraints
+  ML_BSSN
+  ML_BSSN_Helper
+  MoL
+  # Multipole
+  NaNChecker
+  NewRad
+  # NPScalars_Proca
+  ProcaBase
+  Proca_simpleID
+  # PunctureTracker
+  # QuasiLocalMeasures
+  ReflectionSymmetry
+  # RotatingSymmetry180
+  ScalarBase
+  ScalarInit
+  Slab
+  SpaceMask
+  SphericalSurface
+  StaticConformal
+  SummationByParts
+  SymBase
+  # SystemStatistics
+  # TerminationTrigger
+  Time
+  TmunuBase
+  UAv_MagScalarBase
+  UAv_MagScalarEvolve
+  Vectors
+"
+#------------------------------------------------------------------------------
+
+
+# Grid setup
+#------------------------------------------------------------------------------
+
+CartGrid3D::type                     = "coordbase"
+Carpet::domain_from_coordbase        = yes
+CoordBase::domainsize                = "minmax"
+
+# make sure all (xmax - xmin)/dx are integers!
+CoordBase::xmin                      =    0.0
+CoordBase::ymin                      =    0.0
+CoordBase::zmin                      =    0.0
+CoordBase::xmax                      =   +1.0
+CoordBase::ymax                      =   +1.0
+CoordBase::zmax                      =   +1.0
+CoordBase::dx                        =    0.1
+CoordBase::dy                        =    0.1
+CoordBase::dz                        =    0.1
+
+driver::ghost_size                   = 3
+
+CoordBase::boundary_size_x_lower     = 3
+CoordBase::boundary_size_y_lower     = 3
+CoordBase::boundary_size_z_lower     = 3
+CoordBase::boundary_size_x_upper     = 3
+CoordBase::boundary_size_y_upper     = 3
+CoordBase::boundary_size_z_upper     = 3
+
+CoordBase::boundary_shiftout_x_lower = 1
+CoordBase::boundary_shiftout_y_lower = 1
+CoordBase::boundary_shiftout_z_lower = 1
+
+ReflectionSymmetry::reflection_x     = yes
+ReflectionSymmetry::reflection_y     = yes
+ReflectionSymmetry::reflection_z     = yes
+ReflectionSymmetry::avoid_origin_x   = no
+ReflectionSymmetry::avoid_origin_y   = no
+ReflectionSymmetry::avoid_origin_z   = no
+
+Time::dtfac                          = 0.5
+
+
+# Initial Data
+#------------------------------------------------------------------------------
+
+ProcaBase::mu                         = 0.4
+
+ADMBase::initial_data                 = "Proca_simpleID"
+ADMBase::initial_lapse                = "psi^n"
+ADMBase::initial_shift                = "zero"
+ADMBase::initial_dtlapse              = "zero"
+ADMBase::initial_dtshift              = "zero"
+
+ADMBase::lapse_timelevels             = 3
+ADMBase::shift_timelevels             = 3
+ADMBase::metric_timelevels            = 3
+
+# Scalar field zero initial data
+ScalarBase::mu                  = 0.
+ScalarBase::V_lambda            = 0.
+ScalarBase::initial_scalar      = "ID_SF_Zero"
+
+Proca_simpleID::initial_lapse_psi_exponent  = -2.0
+Proca_simpleID::swap_xz               = "no"
+
+Proca_simpleID::par_b                 = 1.e-5
+Proca_simpleID::par_m_plus            = 1.0
+Proca_simpleID::par_q_plus            = 0.05
+
+InitBase::initial_data_setup_method   = "init_some_levels"
+Carpet::init_fill_timelevels          = yes
+Carpet::init_3_timelevels             = no
+
+
+# Evolution
+#------------------------------------------------------------------------------
+
+TmunuBase::stress_energy_storage  = yes
+TmunuBase::stress_energy_at_RHS   = yes
+TmunuBase::timelevels             = 1
+TmunuBase::prolongation_type      = "none"
+
+MagScalarBase::evolution_method = "MagScalarEvolve"
+MagScalarEvolve::chi_floor      = 1.0d-05
+
+ADMBase::evolution_method         = "ML_BSSN"
+ADMBase::lapse_evolution_method   = "ML_BSSN"
+ADMBase::shift_evolution_method   = "ML_BSSN"
+ADMBase::dtlapse_evolution_method = "ML_BSSN"
+ADMBase::dtshift_evolution_method = "ML_BSSN"
+
+ML_BSSN::harmonicN           = 1      # 1+log
+ML_BSSN::harmonicF           = 2.0    # 1+log
+ML_BSSN::ShiftGammaCoeff     = 0.75
+ML_BSSN::BetaDriver          = 1.0
+ML_BSSN::advectLapse         = 1
+ML_BSSN::advectShift         = 1
+
+ML_BSSN::MinimumLapse        = 1.0e-8
+ML_BSSN::conformalMethod     = 1 # 1 for W
+
+
+# Boundary conditions
+#------------------------------------------------------------------------------
+
+ML_BSSN::initial_boundary_condition = "extrapolate-gammas"
+ML_BSSN::rhs_boundary_condition     = "NewRad"
+Boundary::radpower                  = 2
+
+ML_BSSN::ML_log_confac_bound = "none"
+ML_BSSN::ML_metric_bound     = "none"
+ML_BSSN::ML_Gamma_bound      = "none"
+ML_BSSN::ML_trace_curv_bound = "none"
+ML_BSSN::ML_curv_bound       = "none"
+ML_BSSN::ML_lapse_bound      = "none"
+ML_BSSN::ML_dtlapse_bound    = "none"
+ML_BSSN::ML_shift_bound      = "none"
+ML_BSSN::ML_dtshift_bound    = "none"
+
+# Spatial finite differencing
+#------------------------------------------------------------------------------
+
+SummationByParts::order = 4
+ML_BSSN::fdOrder        = 4
+
+
+# Integration method
+#------------------------------------------------------------------------------
+
+MoL::ODE_Method                 = "RK4"
+MoL::MoL_Intermediate_Steps     = 4
+MoL::MoL_Num_Scratch_Levels     = 1
+
+Carpet::num_integrator_substeps = 4
+
+
+# Poison
+#-------------------------------------------------------------------------------
+
+Carpet::poison_new_timelevels = yes
+CarpetLib::poison_new_memory  = yes
+
+
+# I/O thorns
+#-------------------------------------------------------------------------------
+
+Cactus::cctk_run_title       = $parfile
+IO::out_dir                  = $parfile
+IO::out_fileinfo             = "none"
+IO::parfile_write            = "no"
+
+IOBasic::outInfo_every       = 1
+IOBasic::outInfo_vars        = "ADMBase::alp"
+
+
+IOASCII::output_symmetry_points = no
+IOASCII::out3D_ghosts           = no
+
+# 1D text output
+IOASCII::out1D_every            = 1
+IOASCII::out_precision          = 17
+IOASCII::out1D_d                = no
+IOASCII::out1D_x                = yes
+IOASCII::out1D_y                = yes
+IOASCII::out1D_z                = yes
+IOASCII::out1D_vars             = "
+  ADMBase::lapse
+  ML_BSSN::At11
+  ML_BSSN::At12
+  ML_BSSN::ML_dtlapse
+  ML_BSSN::ML_dtshift
+  ML_BSSN::ML_Gamma
+  ML_BSSN::gt11
+  ML_BSSN::gt12
+  ML_BSSN::gt13
+  ML_BSSN::ML_curvrhs
+  ML_BSSN::ML_dtlapserhs
+  ML_BSSN::ML_dtshiftrhs
+  ML_BSSN::ML_Gammarhs
+  ML_BSSN::ML_lapserhs
+  ML_BSSN::ML_log_confacrhs
+  ML_BSSN::ML_metricrhs
+  ML_BSSN::ML_shiftrhs
+  ML_BSSN::ML_trace_curvrhs
+  ProcaBase::Ei
+  ProcaBase::Ai
+  ProcaBase::Aphi
+  ProcaBase::Zeta
+  UAv_MagScalarEvolve::rhs_Ei
+  UAv_MagScalarEvolve::rhs_Ai
+  UAv_MagScalarEvolve::rhs_Aphi
+  UAv_MagScalarEvolve::rhs_Zeta
+"
+
+CarpetIOASCII::compact_format = yes
+
+# Run termination
+#-------------------------------------------------------------------------------
+
+Cactus::terminate       = "iteration"
+Cactus::cctk_itlast     = 4

@@ -1,0 +1,90 @@
+# Parameter definitions
+
+SHARES: ADMBase
+
+EXTENDS KEYWORD initial_data
+{
+  "scalar-cloud_charged-BH" :: "Initial data for a scalar cloud surrounding a charged BH"
+}
+
+EXTENDS KEYWORD initial_lapse
+{
+  "psi^n"   :: "psi^n initial lapse profile"
+}
+
+SHARES: MagScalarBase
+
+EXTENDS KEYWORD initial_MagScalar
+{
+  "MagScalar_PulseID" :: "Pulse initial data for MagScalar fields"
+}
+
+RESTRICTED:
+
+#=== parameters for MagScalar_InitPulse.c ===
+
+REAL pAmp "Amplitude of the pulse"
+{
+  *:*           :: "any number"
+} 10
+
+REAL cAmp "Factor on the exponential"
+{
+  *:*           :: "any number"
+} 0.15
+
+#=== parameters for Scalar-cloud_Charged-BH.c ===
+
+CCTK_REAL M "mass of the BH + scalar field cloud"
+{
+  0:*   :: "any positive value"
+} 1.0
+
+CCTK_REAL Q_BH "charge of the BH"
+{
+  *:*   :: "any value possible"
+} 0.9
+
+CCTK_REAL Amp "amplitude of the scalar field perturbation"
+{
+  *:*   :: "any value possible"
+} 0.5
+
+CCTK_REAL R1 "inner radius of the scalar field perturbation"
+{
+  0:*   :: "any positive value"
+} 8.0
+
+CCTK_REAL R2 "outter radius of the scalar field perturbation, must be larger than R1"
+{
+  0:*   :: "any positive value"
+} 12.0
+
+CCTK_INT N_points "The number of points to go from R1 to R2 to perform the numerical integration"
+{
+  1:*   :: "any positive integer that is larger or equal to 1"
+} 1000000
+
+CCTK_REAL x0 "the x coordinate of the singularity of the BH"
+{
+  *:*   :: "any value possible"
+} 0.0
+
+CCTK_REAL y0 "the y coordinate of the singularity of the BH"
+{
+  *:*   :: "any value possible"
+} 0.0
+
+CCTK_REAL z0 "the z coordinate of the singularity of the BH"
+{
+  *:*   :: "any value possible"
+} 0.0
+
+REAL initial_lapse_psi_exponent "Exponent n for psi^-n initial lapse profile"
+{
+  (*:0) :: "Should be negative"
+} -2.0
+
+BOOLEAN integrate_phi "take into account the scalar field from R1 to R2 (should be set to no for debugging only)"
+{
+} "yes"

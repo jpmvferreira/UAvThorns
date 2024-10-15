@@ -1,0 +1,7 @@
+# Interface definition
+
+IMPLEMENTS: MagScalarInit
+
+INHERITS: ADMBase grid ProcaBase ScalarBase MagScalarBase
+
+PUBLIC:

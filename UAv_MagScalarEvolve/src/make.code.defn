@@ -7,6 +7,7 @@ SRCS = MagScalar_RegisterVars.c     \
        MagScalar_calc_Tmunu.F90     \
        MagScalar_InitSymBound.F90   \
        MagScalar_adm_vs_bssn.F90    \
+       MagScalar_constraints.F90    \
        MagScalar_zero_rhs.F90
 
 # Subdirectories containing source files

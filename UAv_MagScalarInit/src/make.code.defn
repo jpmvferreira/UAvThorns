@@ -1,0 +1,8 @@
+# Main make.code.defn file
+
+# Source files in this directory
+SRCS = MagScalar_InitPulse.c \
+       Scalar-cloud_Charged-BH.c
+
+# Subdirectories containing source files
+SUBDIRS =

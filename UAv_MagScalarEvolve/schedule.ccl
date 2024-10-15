@@ -6,6 +6,11 @@ if (CCTK_EQUALS (evolution_method, "MagScalarEvolve")) {
   STORAGE: rhs_Ei rhs_Ai rhs_Aphi rhs_Zeta rhs_phi rhs_Kphi
   STORAGE: hmetric conf_fac_chi trk
 
+  if (calculate_constraints)
+  {
+    STORAGE: gauss[3]
+  }
+
   schedule MagScalar_InitSymBound at BASEGRID
   {
     LANG: Fortran
@@ -28,23 +33,21 @@ if (CCTK_EQUALS (evolution_method, "MagScalarEvolve")) {
     LANG: Fortran
   } "MoL RHS calculation for MagScalar variables"
 
-  schedule MagScalar_calc_rhs_bdry in MoL_CalcRHS as MagScalar_CalcRHS_Bdry \
-           after MagScalar_CalcRHS
+  schedule MagScalar_calc_rhs_bdry in MoL_CalcRHS as MagScalar_CalcRHS_Bdry after MagScalar_CalcRHS
   {
     LANG: Fortran
   } "MoL boundary RHS calculation for MagScalar variables"
-
 
   schedule MagScalar_Boundaries in MoL_PostStep
   {
     LANG: Fortran
     OPTIONS: LEVEL
-    SYNC: MagScalarBase::Ei
-    SYNC: MagScalarBase::Ai
-    SYNC: MagScalarBase::Aphi
-    SYNC: MagScalarBase::Zeta
-    SYNC: MagScalarBase::phi
-    SYNC: MagScalarBase::Kphi
+    SYNC: ProcaBase::Ei
+    SYNC: ProcaBase::Ai
+    SYNC: ProcaBase::Aphi
+    SYNC: ProcaBase::Zeta
+    SYNC: ScalarBase::phi
+    SYNC: ScalarBase::Kphi
   } "MoL boundary enforcement for MagScalar variables"
 
   schedule GROUP ApplyBCs as MagScalar_ApplyBCs in MoL_PostStep after MagScalar_Boundaries
@@ -56,5 +59,32 @@ if (CCTK_EQUALS (evolution_method, "MagScalarEvolve")) {
   {
     LANG: Fortran
   } "Compute the energy-momentum tensor"
+
+
+  # compute constraints
+  if (calculate_constraints) {
+
+    schedule GROUP MagScalar_constraints AT ANALYSIS
+    {
+      LANG: Fortran
+    } "Compute EMG constraints"
+
+    schedule MagScalar_constraints IN MagScalar_constraints
+    {
+      LANG: Fortran
+    } "Compute constraints"
+
+    schedule MagScalar_constraints_boundaries after MagScalar_constraints in MagScalar_constraints
+    {
+      LANG: Fortran
+      OPTIONS: LEVEL
+      SYNC: MagScalarEvolve::gauss
+    } "Enforce symmetry BCs in constraint computation"
+
+    schedule GROUP ApplyBCs as MagScalar_constraints_ApplyBCs after MagScalar_constraints_boundaries in MagScalar_constraints
+    {
+    } "Apply boundary conditions"
+
+  }
 
 }
