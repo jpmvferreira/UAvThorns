@@ -6,6 +6,8 @@ storage: quadrupole_gf_volume[3]
 storage: total_energy[1]
 storage: total_angular_momentum[1]
 storage: quadrupole[1]
+storage: energy_phi[1]
+storage: density_rho_phi[3]
 
 # allocate densities if required
 if (compute_density_rho)
@@ -58,7 +60,7 @@ schedule UAv_Initialization at BASEGRID
 # loop-local", as well as the schedule bins, see the users list archives
 # https://lists.einsteintoolkit.org/pipermail/users/2024-September/009456.html
 # and corresponding thread (several back and forth replies).
-# 
+#
 # A possible schedule in EVOL would be
 # schedule GROUP UAv_Analysis_Group in MoL_PseudoEvolution after MoL_PostStep
 ###############################################################################

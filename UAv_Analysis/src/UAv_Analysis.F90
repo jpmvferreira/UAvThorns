@@ -17,12 +17,18 @@ subroutine UAv_Analysis_gfs( CCTK_ARGUMENTS )
 
   CCTK_REAL aux, S, rho
   CCTK_REAL mom(3)
-  
+
+  ! scalar/proca field
+  CCTK_REAL lphi1, lphi2, lKphi1, lKphi2
+  CCTK_REAL d1_lphi1(3), d1_lphi2(3)
+  CCTK_REAL lA(3), lAphi
+  CCTK_REAL aux_phi
+
   ! names x0, y0, z0 used as members of the thorn
   ! They are set in dedicated functions, to be called before this routine
   CCTK_REAL x1, y1, z1
 
-  CCTK_INT  i, j, k, m, n
+  CCTK_INT  i, j, k, m, n, a, b
 
   CCTK_INT type_bits, state_outside
 
@@ -30,11 +36,11 @@ subroutine UAv_Analysis_gfs( CCTK_ARGUMENTS )
 
   type_bits     = -1
   state_outside = -1
-  
+
   if (do_analysis_every .le. 0) then
      return
   end if
-  
+
   if (MOD(cctk_iteration, do_analysis_every) .ne. 0 ) then
      return
   endif
@@ -69,6 +75,7 @@ subroutine UAv_Analysis_gfs( CCTK_ARGUMENTS )
   dIyy_gf_volume = 0
   dIyz_gf_volume = 0
   dIzz_gf_volume = 0
+  density_rho_phi = 0
   if (compute_density_rho == 1) then
      density_rho    = 0
   end if
@@ -84,6 +91,36 @@ subroutine UAv_Analysis_gfs( CCTK_ARGUMENTS )
   do k = 1+cctk_nghostzones(3), cctk_lsh(3)-cctk_nghostzones(3)
   do j = 1+cctk_nghostzones(2), cctk_lsh(2)-cctk_nghostzones(2)
   do i = 1+cctk_nghostzones(1), cctk_lsh(1)-cctk_nghostzones(1)
+    ! fetch variables from scalar/proca field
+    lA(1) = Ax(i,j,k)
+    lA(2) = Ay(i,j,k)
+    lA(3) = Az(i,j,k)
+
+    lAphi = Aphi(i,j,k)
+
+    lphi1  = phi1(i,j,k)
+    lphi2  = phi2(i,j,k)
+    lKphi1 = Kphi1(i,j,k)
+    lKphi2 = Kphi2(i,j,k)
+
+    ! compute the derivatives of the scalar field
+    d1_lphi1(1)  = (   -phi1(i+2,j,k) + 8*phi1(i+1,j,k)         &
+        - 8*phi1(i-1,j,k) +   phi1(i-2,j,k) ) / (12*CCTK_DELTA_SPACE(1))
+
+    d1_lphi1(2)  = (   -phi1(i,j+2,k) + 8*phi1(i,j+1,k)         &
+        - 8*phi1(i,j-1,k) +   phi1(i,j-2,k) ) / (12*CCTK_DELTA_SPACE(2))
+
+    d1_lphi1(3)  = (   -phi1(i,j,k+2) + 8*phi1(i,j,k+1)         &
+        - 8*phi1(i,j,k-1) +   phi1(i,j,k-2) ) / (12*CCTK_DELTA_SPACE(3))
+
+    d1_lphi2(1)  = (   -phi2(i+2,j,k) + 8*phi2(i+1,j,k)         &
+        - 8*phi2(i-1,j,k) +   phi2(i-2,j,k) ) / (12*CCTK_DELTA_SPACE(1))
+
+    d1_lphi2(2)  = (   -phi2(i,j+2,k) + 8*phi2(i,j+1,k)         &
+        - 8*phi2(i,j-1,k) +   phi2(i,j-2,k) ) / (12*CCTK_DELTA_SPACE(2))
+
+    d1_lphi2(3)  = (   -phi2(i,j,k+2) + 8*phi2(i,j,k+1)         &
+        - 8*phi2(i,j,k-1) +   phi2(i,j,k-2) ) / (12*CCTK_DELTA_SPACE(3))
 
     ! checking if outside the horizon, if asking for it to be excised
     docalc = .true.
@@ -158,6 +195,27 @@ subroutine UAv_Analysis_gfs( CCTK_ARGUMENTS )
     gu(3,2) = gu(2,3)
     !--------------------------------------------
 
+    ! Eulerian energy density for the scalar field
+    ! density_rho_phi = sqrt(det(g)) n^mu n^nu T^\phi_{mu nu}
+    aux_phi = mu * mu * (lphi1*lphi1 + lphi2*lphi2)                  &
+                 * (1 - 2 * V_lambda * (lphi1*lphi1 + lphi2*lphi2))  &
+                 * (1 - 2 * V_lambda * (lphi1*lphi1 + lphi2*lphi2))
+
+    aux_phi = aux_phi + (2 * lKphi1 - q * lAphi * lphi2)*(2 * lKphi1 - q * lAphi * lphi2)  &
+                      + (2 * lKphi2 + q * lAphi * lphi1)*(2 * lKphi2 + q * lAphi * lphi1)
+
+    do a = 1, 3
+      do b = 1, 3
+          aux_phi = aux_phi + gu(a,b) * (d1_lphi1(a) * d1_lphi1(b)                &
+                            + d1_lphi2(a) * d1_lphi2(b)                           &
+                            + 2 * q * lA(a) * lphi1 * d1_lphi2(b)                 &
+                            - 2 * q * lA(a) * lphi2 * d1_lphi1(b)                 &
+                            + q*q * lA(a) * lA(b) * (lphi1*lphi1 + lphi2*lphi2))
+      end do
+    end do
+
+    density_rho_phi(i,j,k) = sqrt(detgd) * aux_phi
+
     ! Eulerian energy density
     rho = Tab(4,4)
     do m = 1, 3
@@ -171,7 +229,7 @@ subroutine UAv_Analysis_gfs( CCTK_ARGUMENTS )
     if (compute_density_rho == 1) then
       density_rho(i,j,k) = rho
     end if
-    
+
     ! momentum density
     do n = 1, 3
       mom(n) = Tab(4,n)
@@ -180,13 +238,12 @@ subroutine UAv_Analysis_gfs( CCTK_ARGUMENTS )
       end do
       mom(n) = - mom(n) / alph
     end do
-   
+
     if (compute_density_p == 1) then
       density_px(i,j,k) = mom(1)
       density_py(i,j,k) = mom(2)
       density_pz(i,j,k) = mom(3)
     end if
-   
 
     aux = 0
     do m = 1, 3
@@ -212,7 +269,7 @@ subroutine UAv_Analysis_gfs( CCTK_ARGUMENTS )
     dJz_gf_volume(i,j,k)  = (-y1 * mom(1) + x1 * mom(2)) * sqrt(detgd)
     dJx_gf_volume(i,j,k)  = (-z1 * mom(2) + y1 * mom(3)) * sqrt(detgd)
     dJy_gf_volume(i,j,k)  = (-x1 * mom(3) + z1 * mom(1)) * sqrt(detgd)
-    
+
     ! dI_ij = rho * x^i x^j * alpha * sqrt(detgd)
     dIxx_gf_volume(i,j,k) = alph * rho * x1 * x1 * sqrt(detgd)
     dIxy_gf_volume(i,j,k) = alph * rho * x1 * y1 * sqrt(detgd)
@@ -234,9 +291,9 @@ subroutine UAv_Analysis_IntegrateVol( CCTK_ARGUMENTS )
   DECLARE_CCTK_PARAMETERS
 
   ! num_out_vals: number of output values for a given reduction
-  CCTK_INT, PARAMETER :: num_in_fields = 10, num_out_vals = 1  
+  CCTK_INT, PARAMETER :: num_in_fields = 11, num_out_vals = 1
   CCTK_REAL out_vals(num_in_fields*num_out_vals)
-  
+
   CCTK_INT ierr
   CCTK_INT reduction_handle, varid(num_in_fields)
 
@@ -244,21 +301,22 @@ subroutine UAv_Analysis_IntegrateVol( CCTK_ARGUMENTS )
   CCTK_REAL dV
 
   character(len=*), PARAMETER :: thorn_str = "UAv_Analysis::"
-  CCTK_INT, PARAMETER :: thorn_strlen = LEN(thorn_str), var_strlen = 14 ! 14 for dIxy_gf_volume (largest so far)
-  CCTK_INT, PARAMETER :: full_strlen = thorn_strlen + var_strlen 
+  CCTK_INT, PARAMETER :: thorn_strlen = LEN(thorn_str), var_strlen = 15 ! 15 for density_rho_phi (largest so far)
+  CCTK_INT, PARAMETER :: full_strlen = thorn_strlen + var_strlen
   character(len=full_strlen), dimension(num_in_fields) :: varnames
 
-  varnames = [character(len=full_strlen) :: &
-               thorn_str//"dE_gf_volume  ", &
-               thorn_str//"dJx_gf_volume ", &
-               thorn_str//"dJy_gf_volume ", &
-               thorn_str//"dJz_gf_volume ", &
-               thorn_str//"dIxx_gf_volume", &
-               thorn_str//"dIxy_gf_volume", &
-               thorn_str//"dIxz_gf_volume", &
-               thorn_str//"dIyy_gf_volume", &
-               thorn_str//"dIyz_gf_volume", &
-               thorn_str//"dIzz_gf_volume"]
+  varnames = [character(len=full_strlen) ::  &
+               thorn_str//"dE_gf_volume   ", &
+               thorn_str//"dJx_gf_volume  ", &
+               thorn_str//"dJy_gf_volume  ", &
+               thorn_str//"dJz_gf_volume  ", &
+               thorn_str//"dIxx_gf_volume ", &
+               thorn_str//"dIxy_gf_volume ", &
+               thorn_str//"dIxz_gf_volume ", &
+               thorn_str//"dIyy_gf_volume ", &
+               thorn_str//"dIyz_gf_volume ", &
+               thorn_str//"dIzz_gf_volume ", &
+               thorn_str//"density_rho_phi"]
 
 
   if (do_analysis_every .le. 0) then
@@ -268,7 +326,7 @@ subroutine UAv_Analysis_IntegrateVol( CCTK_ARGUMENTS )
   if (MOD(cctk_iteration, do_analysis_every) .ne. 0 ) then
      return
   end if
-  
+
   call CCTK_ReductionHandle(reduction_handle, 'sum')
   if (reduction_handle < 0) then
      call CCTK_WARN(0, 'Could not obtain a handle for sum reduction')
@@ -286,11 +344,13 @@ subroutine UAv_Analysis_IntegrateVol( CCTK_ARGUMENTS )
 
   ! Call reduction
   ! do a sum over all processors
-  call CCTK_Reduce(ierr, cctkGH, -1, reduction_handle, num_out_vals, CCTK_VARIABLE_REAL, &
-       out_vals, num_in_fields, &
-       varid(1), & ! E
-       varid(2), varid(3), varid(4), & ! J_i
-       varid(5), varid(6), varid(7), varid(8), varid(9), varid(10)) ! I_ij
+  call CCTK_Reduce(                                                                                &
+    ierr, cctkGH, -1, reduction_handle, num_out_vals, CCTK_VARIABLE_REAL, out_vals, num_in_fields, &
+    varid(1),                                                    & ! E
+    varid(2), varid(3), varid(4),                                & ! J_i
+    varid(5), varid(6), varid(7), varid(8), varid(9), varid(10), & ! I_ij
+    varid(11)                                                    & ! E^\phi
+  )
   if (ierr < 0) then
      call CCTK_WARN(0, 'Error while reducing the auxiliary XX_gf_volume grid functions.')
   end if
@@ -313,6 +373,8 @@ subroutine UAv_Analysis_IntegrateVol( CCTK_ARGUMENTS )
   Iyy = out_vals(8)
   Iyz = out_vals(9)
   Izz = out_vals(10)
+
+  energy_phi = out_vals(11)
 
   ! write(*,*) 'total_energy = ', total_energy
 

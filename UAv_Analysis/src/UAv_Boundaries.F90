@@ -29,7 +29,7 @@ subroutine UAv_Analysis_Boundaries( CCTK_ARGUMENTS )
           call CCTK_ERROR("Failed to register BC for UAv_Analysis::density_rho!")
   end if
 
-  if (compute_density_p == 1) then 
+  if (compute_density_p == 1) then
      ierr = Boundary_SelectGroupForBC(cctkGH, CCTK_ALL_FACES, bndsize, -one, &
           "UAv_Analysis::density_p", "flat")
      if (ierr < 0)                                                           &

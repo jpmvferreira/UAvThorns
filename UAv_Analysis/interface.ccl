@@ -1,7 +1,7 @@
 # Interface definition for thorn UAv_Analysis
 
 implements: UAv_Analysis
-inherits: ADMBase TmunuBase SphericalSurface SpaceMask
+inherits: ADMBase TmunuBase SphericalSurface SpaceMask ScalarBase ProcaBase MagScalarBase
 
 USES INCLUDE: SpaceMask.h
 
@@ -17,6 +17,10 @@ USES FUNCTION Boundary_SelectGroupForBC
 
 
 private:
+
+CCTK_REAL energy_phi type=scalar timelevels=1 tags='checkpoint="no"' "Eulerian energy of the scalar field"
+
+CCTK_REAL density_rho_phi type=gf timelevels=3 tags='Prolongation="none" tensortypealias="Scalar" checkpoint="no"' "energy density gridfunction of the scalar field for volume integration"
 
 CCTK_REAL total_energy type=scalar timelevels=1 tags='checkpoint="no"' "Komar mass (volume integral). See Gourgoulhon's 3+1 Formalism, sections 8.6.1 and 8.6.2 (Eq. 8.63 and 8.70)."
 
@@ -67,7 +71,7 @@ CCTK_REAL origin_coordinates type=scalar tags='checkpoint="no"'
   x0, y0, z0
 } "Coordinates of the origin used in the analysis"
 
-CCTK_INT origin_from_grid_scalar_index type=scalar tags='checkpoint="no"' 
+CCTK_INT origin_from_grid_scalar_index type=scalar tags='checkpoint="no"'
 {
   origin_from_grid_scalar_index_x
   origin_from_grid_scalar_index_y

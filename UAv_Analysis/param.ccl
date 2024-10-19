@@ -1,5 +1,12 @@
 # Parameter definitions for thorn UAv_Analysis
 
+shares: ScalarBase
+USES CCTK_REAL V_lambda
+USES CCTK_REAL mu
+
+shares: MagScalarBase
+USES CCTK_REAL q
+
 # exclude horizon from integration
 
 BOOLEAN excise_horizon "excise the region inside the AH from the volume integrations?" STEERABLE=ALWAYS
