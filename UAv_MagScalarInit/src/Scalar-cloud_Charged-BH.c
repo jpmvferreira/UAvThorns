@@ -197,7 +197,9 @@ params_t Get_p_BH(params_t p, double C[2]) {
   }
 
   // if the mass of the BH is still not valid, give an error
-  if (M_BH < fabs(Q) || M_BH > M) {
+  // we're comparing `M_BH > 1.001*M` instead of `M_BH > M` due to numerical roundoff errors when computing M_BH
+  // the pre-factor is quite arbitrary but in this case it works, and it's just 0.1% of the ADM mass as error
+  if (M_BH < fabs(Q) || M_BH > 1.001*M) {
     CCTK_VERROR("M_BH is %g, which is either smaller than the absolute value of the charge Q = %g or larger than the ADM mass M = %g: no physical solutions have been found", M_BH, Q, M);
   }
 
