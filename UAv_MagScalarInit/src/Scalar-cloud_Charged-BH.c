@@ -1,7 +1,6 @@
 // Relevant documentation:
 // GSL ODE solver: https://www.gnu.org/software/gsl/doc/html/ode-initval.html
 // GSL interpolator: https://www.gnu.org/software/gsl/doc/html/interp.html
-// stb_ds.h: http://nothings.org/stb_ds/
 
 // macros
 #define SQR(x) ((x)*(x))
@@ -229,7 +228,7 @@ void Scalar_cloud_Charged_BH(CCTK_ARGUMENTS) {
   // spacetime parameters as seen by an observer at infinity
   params_t p = {
     .M   = M,
-    .Q   = Q_BH,  // because the scalar field is neutral the observer will only see the charge of the BH
+    .Q   = Q_BH,
     .Amp = Amp,
     .R1  = R1,
     .R2  = R2,
@@ -307,9 +306,16 @@ void Scalar_cloud_Charged_BH(CCTK_ARGUMENTS) {
         Kphi2[ind] = 0;
 
         // the electric field
-        Ex[ind] = pow(lpsi,-6) * p.Q/(sqrt(4.*M_PI)*pow(R,3)) * x1;
-        Ey[ind] = pow(lpsi,-6) * p.Q/(sqrt(4.*M_PI)*pow(R,3)) * y1;
-        Ez[ind] = pow(lpsi,-6) * p.Q/(sqrt(4.*M_PI)*pow(R,3)) * z1;
+        if (convention_pi == 0) {
+          Ex[ind] = pow(lpsi,-6) * p.Q/(sqrt(4.*M_PI)*pow(R,3)) * x1;
+          Ey[ind] = pow(lpsi,-6) * p.Q/(sqrt(4.*M_PI)*pow(R,3)) * y1;
+          Ez[ind] = pow(lpsi,-6) * p.Q/(sqrt(4.*M_PI)*pow(R,3)) * z1;
+        }
+        else {
+          Ex[ind] = pow(lpsi,-6) * p.Q/pow(R,3) * x1;
+          Ey[ind] = pow(lpsi,-6) * p.Q/pow(R,3) * y1;
+          Ez[ind] = pow(lpsi,-6) * p.Q/pow(R,3) * z1;
+        }
 
         Ax[ind] = 0;
         Ay[ind] = 0;

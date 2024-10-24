@@ -88,3 +88,7 @@ REAL initial_lapse_psi_exponent "Exponent n for psi^-n initial lapse profile"
 BOOLEAN integrate_phi "take into account the scalar field from R1 to R2 (should be set to no for debugging only)"
 {
 } "yes"
+
+BOOLEAN convention_pi "use a convention which differs by a factor of 2*sqrt(pi) on the charge"
+{
+} "no"
