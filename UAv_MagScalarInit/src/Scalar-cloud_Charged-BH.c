@@ -26,6 +26,8 @@ typedef struct {
   double R1;
   double R2;
   double c;
+  double mu;
+  double V_lambda;
 } params_t;
 
 // define a strut to use as the return object of the function Get_Psi
@@ -97,13 +99,16 @@ int f(double R, const double y[], double dy[], void *params) {
   // fetch the relevant parameters
   // cannot change function signature due to GSL API, must recast pointer in correct type
   params_t p = *(params_t *)params;
-  double Q   = p.Q;
+  double Q        = p.Q;
+  double mu       = p.mu;
+  double V_lambda = p.V_lambda;
 
-  // compute the derivative of the scalar field at radius R
+  // get the value of the scalar field and its derivative at radius R
+  double lphi  = phi(R, p);
   double ldphi = dphi(R, p);
 
   dy[0] = y[1];
-  dy[1] = (-2.*y[1])/R - pow(Q,2)/(4.*pow(R,4)*pow(y[0],3)) - 2.*pow(ldphi,2)*M_PI*y[0];
+  dy[1] = (-2.*y[1])/R - pow(Q,2)/(4.*pow(R,4)*pow(y[0],3)) - 2.*pow(ldphi,2)*M_PI*y[0] - 2.*pow(lphi,2)*M_PI*pow(1. - 2.*pow(lphi,2)*V_lambda,2)*pow(mu,2)*pow(y[0],5);
 
   return GSL_SUCCESS;
 }
@@ -215,6 +220,8 @@ params_t Get_p_BH(params_t p, double C[2]) {
     .R1  = p.R1,
     .R2  = p.R2,
     .c   = c_BH,
+    .mu  = p.mu,
+    .V_lambda = p.V_lambda,
   };
 
   return p_BH;
@@ -233,6 +240,8 @@ void Scalar_cloud_Charged_BH(CCTK_ARGUMENTS) {
     .R1  = R1,
     .R2  = R2,
     .c   = 1,
+    .mu  = mu,
+    .V_lambda = V_lambda,
   };
 
   // fetch interpolation function to compute Ψ(R)

@@ -12,6 +12,10 @@ EXTENDS KEYWORD initial_lapse
   "psi^n"   :: "psi^n initial lapse profile"
 }
 
+shares: ScalarBase
+USES CCTK_REAL V_lambda
+USES CCTK_REAL mu
+
 SHARES: MagScalarBase
 
 EXTENDS KEYWORD initial_MagScalar
